@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#16834a">
+<title>Chemistry Solver</title>
+<style>
+:root{--green:#16834a;--dark:#0d6035;--pale:#eaf7ef;--bg:#f5faf6;--ink:#183126;--muted:#64756b;--line:#dce9df;--white:#fff}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
+header{background:linear-gradient(135deg,#16834a,#0d6035);color:white;padding:24px 18px 28px;border-radius:0 0 25px 25px}
+header .small{font-size:12px;letter-spacing:1.5px;opacity:.85} h1{font-size:27px;margin:8px 0 6px} header p{margin:0;opacity:.9;font-size:14px;line-height:1.45}
+main{max-width:720px;margin:auto;padding:16px}
+.screen{display:none}.screen.active{display:block}
+.section-title{font-size:19px;margin:12px 2px 5px}.sub{color:var(--muted);font-size:13px;margin:0 2px 14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.topic{background:white;border:1px solid var(--line);border-radius:17px;padding:17px;text-align:left;min-height:120px;box-shadow:0 3px 12px #143d2110;color:var(--ink);cursor:pointer}
+.topic .emoji{font-size:25px}.topic strong{display:block;margin:10px 0 4px;font-size:15px}.topic span:last-child{font-size:12px;color:var(--muted);line-height:1.35}
+.card{background:white;border:1px solid var(--line);border-radius:17px;padding:17px;margin:12px 0;box-shadow:0 3px 12px #143d210b}
+h2{font-size:20px;margin:5px 0 6px}.card h3{font-size:16px;margin:0 0 12px}
+label{display:block;font-size:13px;font-weight:700;margin:12px 0 6px}
+input,select{width:100%;padding:12px;border:1px solid #cbdccf;border-radius:10px;background:#fff;font-size:16px;color:var(--ink)}
+button{border:0;border-radius:11px;padding:12px 15px;background:var(--green);color:white;font-weight:700;font-size:14px;cursor:pointer}
+button.secondary{background:var(--pale);color:var(--dark);border:1px solid #cce6d4}
+button.full{width:100%;margin-top:14px}
+.actions{display:flex;gap:9px;margin:14px 0}.actions button{flex:1}
+.result{background:var(--pale);border:1px solid #cce6d4;border-radius:12px;padding:13px;margin-top:13px;display:none}
+.result strong{color:var(--dark);font-size:18px}.steps{font-size:13px;line-height:1.6;margin-top:8px;color:#294638}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+.formula{padding:10px 12px;background:#f5faf6;border-radius:10px;margin:8px 0;font-size:14px}
+.back{margin:4px 0 12px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:24px 8px}
+@media(max-width:390px){.grid{grid-template-columns:1fr}header{padding-top:20px}}
+</style>
+</head>
+<body>
+<header><div class="small">LEARN • CALCULATE • UNDERSTAND</div><h1>⚗️ Chemistry Solver</h1><p>Your simple guide to Matter and Energy, Thermochemistry, Stoichiometry, and important chemistry formulas.</p></header>
+<main>
+<section id="home" class="screen active">
+ <h2 class="section-title">Choose a topic</h2><p class="sub">Select a calculator or open the formula guide.</p>
+ <div class="grid">
+  <button class="topic" onclick="show('matter')"><span class="emoji">🧪</span><strong>Matter and Energy</strong><span>Density, mass, volume and temperature</span></button>
+  <button class="topic" onclick="show('thermo')"><span class="emoji">🌡️</span><strong>Thermochemistry</strong><span>Heat, specific heat and temperature change</span></button>
+  <button class="topic" onclick="show('stoich')"><span class="emoji">⚖️</span><strong>Stoichiometry</strong><span>Moles, mass and molar mass</span></button>
+  <button class="topic" onclick="show('guide')"><span class="emoji">📘</span><strong>Formula Guide</strong><span>Common formulas and explanations</span></button>
+ </div>
+ <div class="card" id="webSearchCard"><h3>🌐 Search Chemistry Websites</h3>
+ <p class="note">Look up chemistry topics, definitions, formulas, examples, and learning resources online. Search results will open in your browser.</p>
+ <label for="webQuery">What do you want to search?</label>
+ <input id="webQuery" type="search" placeholder="e.g. balancing chemical equations">
+ <label for="webSource">Choose a website</label>
+ <select id="webSource"><option value="google">Google Search (all websites)</option><option value="scholar">Google Scholar (research articles)</option><option value="pubchem">PubChem (chemical information)</option><option value="wikipedia">Wikipedia</option><option value="youtube">YouTube (learning videos)</option></select>
+ <button class="full" type="button" onclick="searchWebsite()">Search Website ↗</button>
+ <p class="note">Tip: Check the reliability of online information and use sources approved by your teacher.</p></div>
+ <div class="card"><h3>How to use</h3><p class="note">Choose a topic, enter the required values, and tap Calculate. The app shows the answer and a short step-by-step solution. Use consistent units.</p></div>
+</section>
+
+<section id="matter" class="screen">
+ <button class="secondary back" onclick="show('home')">← Back to Home</button><h2>Matter and Energy</h2><p class="sub">Calculate density, mass, volume, or convert temperature.</p>
+ <div class="card"><h3>Density • Mass • Volume</h3>
+ <label for="mMode">What do you want to find?</label><select id="mMode"><option value="density">Density (g/mL)</option><option value="mass">Mass (g)</option><option value="volume">Volume (mL)</option></select>
+ <label for="mA" id="mALabel">Mass (g)</label><input id="mA" type="number" step="any" placeholder="Enter mass">
+ <label for="mB" id="mBLabel">Volume (mL)</label><input id="mB" type="number" step="any" placeholder="Enter volume">
+ <button class="full" onclick="matterCalc()">Calculate</button><div id="mResult" class="result"></div></div>
+ <div class="card"><h3>Temperature Converter</h3>
+ <label for="tMode">Conversion</label><select id="tMode"><option value="cf">Celsius to Fahrenheit</option><option value="fc">Fahrenheit to Celsius</option><option value="ck">Celsius to Kelvin</option><option value="kc">Kelvin to Celsius</option></select>
+ <label for="temp">Temperature</label><input id="temp" type="number" step="any" placeholder="Enter temperature">
+ <button class="full" onclick="tempCalc()">Convert</button><div id="tResult" class="result"></div></div>
+</section>
+
+<section id="thermo" class="screen">
+ <button class="secondary back" onclick="show('home')">← Back to Home</button><h2>Thermochemistry</h2><p class="sub">Use q = mcΔT to calculate heat, mass, specific heat, or temperature change.</p>
+ <div class="card"><h3>Heat Equation Solver</h3>
+ <label for="qMode">Find</label><select id="qMode"><option value="q">Heat (q, J)</option><option value="m">Mass (m, g)</option><option value="c">Specific heat (c, J/g°C)</option><option value="dt">Temperature change (ΔT, °C)</option></select>
+ <label for="q1" id="q1Label">Mass (g)</label><input id="q1" type="number" step="any" placeholder="Enter mass">
+ <label for="q2" id="q2Label">Specific heat (J/g°C)</label><input id="q2" type="number" step="any" placeholder="Enter specific heat">
+ <label for="q3" id="q3Label">Temperature change (°C)</label><input id="q3" type="number" step="any" placeholder="Enter ΔT">
+ <button class="full" onclick="thermoCalc()">Calculate</button><div id="qResult" class="result"></div>
+ <p class="note">For this solver, enter ΔT as final temperature minus initial temperature.</p></div>
+</section>
+
+<section id="stoich" class="screen">
+ <button class="secondary back" onclick="show('home')">← Back to Home</button><h2>Stoichiometry</h2><p class="sub">Convert between mass, moles, and molar mass.</p>
+ <div class="card"><h3>Mole Relationship Solver</h3>
+ <label for="sMode">Find</label><select id="sMode"><option value="moles">Moles (mol)</option><option value="mass">Mass (g)</option><option value="mm">Molar mass (g/mol)</option></select>
+ <label for="s1" id="s1Label">Mass (g)</label><input id="s1" type="number" step="any" placeholder="Enter mass">
+ <label for="s2" id="s2Label">Molar mass (g/mol)</label><input id="s2" type="number" step="any" placeholder="Enter molar mass">
+ <button class="full" onclick="stoichCalc()">Calculate</button><div id="sResult" class="result"></div>
+ <p class="note">This is the basic mole relationship. For reaction-based stoichiometry, first balance the chemical equation and use its mole ratio.</p></div>
+</section>
+
+<section id="guide" class="screen">
+ <button class="secondary back" onclick="show('home')">← Back to Home</button><h2>Chemistry Formula Guide</h2><p class="sub">Common formulas with quick explanations.</p>
+ <div class="card"><h3>Matter and Energy</h3>
+ <div class="formula"><b>Density:</b> D = m ÷ V<br><span class="note">Mass divided by volume.</span></div>
+ <div class="formula"><b>Mass:</b> m = D × V</div><div class="formula"><b>Volume:</b> V = m ÷ D</div>
+ <div class="formula"><b>Fahrenheit:</b> °F = (°C × 9/5) + 32</div><div class="formula"><b>Celsius:</b> °C = (°F − 32) × 5/9</div><div class="formula"><b>Kelvin:</b> K = °C + 273.15</div></div>
+ <div class="card"><h3>Thermochemistry</h3><div class="formula"><b>Heat:</b> q = mcΔT</div><div class="formula"><b>Temperature change:</b> ΔT = T<sub>final</sub> − T<sub>initial</sub></div><p class="note">q = heat energy in joules, m = mass in grams, c = specific heat capacity, and ΔT = temperature change.</p></div>
+ <div class="card"><h3>Stoichiometry</h3><div class="formula"><b>Moles:</b> n = m ÷ M</div><div class="formula"><b>Mass:</b> m = n × M</div><div class="formula"><b>Molar mass:</b> M = m ÷ n</div><p class="note">n = amount in moles, m = mass in grams, M = molar mass in grams per mole.</p></div>
+ <div class="card"><h3>Important reminder</h3><p class="note">Always check units, use a balanced chemical equation for reaction calculations, and round answers according to the significant-figure rules required by your teacher.</p></div>
+</section>
+</main><footer>Chemistry Solver • Educational project prototype</footer>
+<script>
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function searchWebsite(){
+ const input=document.getElementById('webQuery');
+ const query=input.value.trim();
+ const source=document.getElementById('webSource').value;
+ if(!query){input.focus();alert('Please type a chemistry topic to search.');return;}
+ const q=encodeURIComponent(query);
+ const urls={
+  google:'https://www.google.com/search?q='+q,
+  scholar:'https://scholar.google.com/scholar?q='+q,
+  pubchem:'https://pubchem.ncbi.nlm.nih.gov/#query='+q,
+  wikipedia:'https://en.wikipedia.org/w/index.php?search='+q,
+  youtube:'https://www.youtube.com/results?search_query='+q
+ };
+ window.open(urls[source], '_blank', 'noopener');
+}
+document.getElementById('webQuery').addEventListener('keydown',function(event){if(event.key==='Enter')searchWebsite()});
+function num(id){const v=document.getElementById(id).value;return v.trim()===''?NaN:Number(v)}
+function result(id,title,steps){const el=document.getElementById(id);el.style.display='block';el.innerHTML='<strong>'+title+'</strong><div class="steps">'+steps+'</div>'}
+function error(id,msg){result(id,'Check your input',msg)}
+const mMode=document.getElementById('mMode');
+function updateMatter(){let v=mMode.value;document.getElementById('mALabel').textContent=v==='volume'?'Mass (g)':'Mass (g)';document.getElementById('mBLabel').textContent=v==='mass'?'Density (g/mL)':'Volume (mL)';document.getElementById('mA').placeholder=v==='mass'?'Enter mass (g)':'Enter mass (g)';document.getElementById('mB').placeholder=v==='mass'?'Enter density (g/mL)':'Enter volume (mL)';if(v==='density'){document.getElementById('mALabel').textContent='Mass (g)';document.getElementById('mBLabel').textContent='Volume (mL)'}if(v==='mass'){document.getElementById('mALabel').textContent='Density (g/mL)';document.getElementById('mBLabel').textContent='Volume (mL)'}if(v==='volume'){document.getElementById('mALabel').textContent='Mass (g)';document.getElementById('mBLabel').textContent='Density (g/mL)'}}
+mMode.addEventListener('change',updateMatter);updateMatter();
+function matterCalc(){let a=num('mA'),b=num('mB'),v=mMode.value;if(!Number.isFinite(a)||!Number.isFinite(b)){error('mResult','Please enter both values.');return}let ans,unit,steps;if(v==='density'){if(b===0){error('mResult','Volume cannot be zero.');return}ans=a/b;unit='g/mL';steps=`Formula: D = m ÷ V<br>Substitute: D = ${a} ÷ ${b}<br>Answer: ${ans.toFixed(4)} ${unit}`}else if(v==='mass'){ans=a*b;unit='g';steps=`Formula: m = D × V<br>Substitute: m = ${a} × ${b}<br>Answer: ${ans.toFixed(4)} ${unit}`}else{if(b===0){error('mResult','Density cannot be zero.');return}ans=a/b;unit='mL';steps=`Formula: V = m ÷ D<br>Substitute: V = ${a} ÷ ${b}<br>Answer: ${ans.toFixed(4)} ${unit}`}result('mResult',`${ans.toFixed(4)} ${unit}`,steps)}
+function tempCalc(){let x=num('temp'),v=document.getElementById('tMode').value;if(!Number.isFinite(x)){error('tResult','Please enter a temperature.');return}let y,unit,formula;if(v==='cf'){y=x*9/5+32;unit='°F';formula='°F = (°C × 9/5) + 32'}else if(v==='fc'){y=(x-32)*5/9;unit='°C';formula='°C = (°F − 32) × 5/9'}else if(v==='ck'){y=x+273.15;unit='K';formula='K = °C + 273.15'}else{y=x-273.15;unit='°C';formula='°C = K − 273.15'}result('tResult',`${y.toFixed(2)} ${unit}`,`Formula: ${formula}<br>Substitute the given value: ${x}<br>Answer: ${y.toFixed(2)} ${unit}`)}
+const qMode=document.getElementById('qMode');
+function updateThermo(){let v=qMode.value;let labels={q:['Mass (g)','Specific heat (J/g°C)','Temperature change (°C)'],m:['Heat (J)','Specific heat (J/g°C)','Temperature change (°C)'],c:['Heat (J)','Mass (g)','Temperature change (°C)'],dt:['Heat (J)','Mass (g)','Specific heat (J/g°C)']}[v];['q1','q2','q3'].forEach((id,i)=>document.getElementById(id+'Label').textContent=labels[i])}
+qMode.addEventListener('change',updateThermo);updateThermo();
+function thermoCalc(){let a=num('q1'),b=num('q2'),c=num('q3'),v=qMode.value;if(![a,b,c].every(Number.isFinite)){error('qResult','Please enter all three values.');return}let ans,unit,formula,sub;if(v==='q'){ans=a*b*c;unit='J';formula='q = mcΔT';sub=`q = ${a} × ${b} × ${c}`}else if(v==='m'){if(b*c===0){error('qResult','Specific heat and temperature change cannot produce a zero divisor.');return}ans=a/(b*c);unit='g';formula='m = q ÷ (cΔT)';sub=`m = ${a} ÷ (${b} × ${c})`}else if(v==='c'){if(a*c===0){error('qResult','Mass and temperature change cannot produce a zero divisor.');return}ans=a/(b*c);unit='J/g°C';formula='c = q ÷ (mΔT)';sub=`c = ${a} ÷ (${b} × ${c})`}else{if(b*c===0){error('qResult','Mass and specific heat cannot produce a zero divisor.');return}ans=a/(b*c);unit='°C';formula='ΔT = q ÷ (mc)';sub=`ΔT = ${a} ÷ (${b} × ${c})`}result('qResult',`${ans.toFixed(4)} ${unit}`,`Formula: ${formula}<br>Substitute: ${sub}<br>Answer: ${ans.toFixed(4)} ${unit}`)}
+const sMode=document.getElementById('sMode');
+function updateStoich(){let v=sMode.value;document.getElementById('s1Label').textContent=v==='moles'?'Mass (g)':v==='mass'?'Moles (mol)':'Mass (g)';document.getElementById('s2Label').textContent=v==='mass'?'Molar mass (g/mol)':v==='mm'?'Moles (mol)':'Molar mass (g/mol)'}
+sMode.addEventListener('change',updateStoich);updateStoich();
+function stoichCalc(){let a=num('s1'),b=num('s2'),v=sMode.value;if(!Number.isFinite(a)||!Number.isFinite(b)){error('sResult','Please enter both values.');return}let ans,unit,formula,sub;if(v==='moles'){if(b===0){error('sResult','Molar mass cannot be zero.');return}ans=a/b;unit='mol';formula='n = m ÷ M';sub=`n = ${a} ÷ ${b}`}else if(v==='mass'){ans=a*b;unit='g';formula='m = n × M';sub=`m = ${a} × ${b}`}else{if(b===0){error('sResult','Moles cannot be zero.');return}ans=a/b;unit='g/mol';formula='M = m ÷ n';sub=`M = ${a} ÷ ${b}`}result('sResult',`${ans.toFixed(4)} ${unit}`,`Formula: ${formula}<br>Substitute: ${sub}<br>Answer: ${ans.toFixed(4)} ${unit}`)}
+</script>
+</body></html>
